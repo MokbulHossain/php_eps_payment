@@ -46,9 +46,10 @@
     $payment_initiate_response = $EpsPayment->CreatePayment($payload);
     print_r($payment_initiate_response);
 
-    if($payment_initiate_response->RedirectGatewayURL){
+    if($payment_initiate_response->RedirectURL){
 
         //redirect RedirectGatewayURL on browser..
+        //$payment_initiate_response->RedirectURL
     }
 
    }
