@@ -127,6 +127,59 @@ class EPS {
           }
           curl_close($curl);
           return json_decode($response);
-      }
+    }
+
+    //check payment status...
+    function CheckPaymentStatus($invoice_id) {
+
+        $getToken_response = $this->GetToken();
+          if(!isset($getToken_response->token)){
+  
+              die("Access Denied!");
+          }
+  
+          $curl = curl_init();
+
+          $x_hash = $this->GenerateHash($invoice_id,$this->hashkey);
+          $token = $getToken_response->token;
+  
+          curl_setopt_array($curl, array(
+          CURLOPT_URL => $this->baseUrl.'/v1/EPSEngine/CheckMerchantTransactionStatus?merchantTransactionId='.$invoice_id,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => '',
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => 'GET',
+          CURLOPT_POSTFIELDS =>json_encode($req_body),
+          CURLOPT_HTTPHEADER => array(
+              "x-hash: $x_hash",
+              "Authorization: Bearer $token",
+              "Content-Type: application/json"
+            ),
+          ));
+  
+          $response = curl_exec($curl);
+  
+          if ($response === false) {
+              $error = curl_error($curl);
+              $info = curl_getinfo($curl);
+              die("cURL request failed, error = {$error}; info = " . print_r($info, true));
+          }
+  
+          $responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+          /*
+          * 4xx status codes are client errors
+          * 5xx status codes are server errors
+          */
+          if ($responseCode >= 400) {
+              die("HTTP Error in gettoken: ". $responseCode);
+          }
+          curl_close($curl);
+          return json_decode($response);
+    }
   }
+
+  
 ?>
